@@ -123,8 +123,6 @@ if st.button("Predict Heart Disease Risk"):
     pdf.set_font("Arial", "B", size=12)
     pdf.cell(0, 10, "Risk Assessment", ln=True)
     pdf.set_font("Arial", size=12)
-    pdf.cell(50, 10, "Field", border=1)
-    pdf.cell(140, 10, "Details", border=1, ln=True)
     pdf.cell(50, 10, "Risk Level", border=1)
     pdf.cell(140, 10, risk_level, border=1, ln=True)
 
