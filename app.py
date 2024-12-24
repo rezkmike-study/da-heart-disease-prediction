@@ -35,7 +35,13 @@ sex_value = 1 if sex == "Male" else 0
 chest_pain_type = st.selectbox(
     "Chest Pain Type", 
     ["Typical Angina", "Atypical Angina", "Non-Anginal Pain", "Asymptomatic"],
-    help="Type of chest pain experienced by the patient."
+    help=(
+        "Type of chest pain experienced by the patient:\n"
+        "- Typical Angina: Pain caused by reduced blood flow to the heart.\n"
+        "- Atypical Angina: Less common symptoms of angina.\n"
+        "- Non-Anginal Pain: Chest pain not related to heart conditions.\n"
+        "- Asymptomatic: No chest pain symptoms."
+    )
 )
 chest_pain_type_value = ["Typical Angina", "Atypical Angina", "Non-Anginal Pain", "Asymptomatic"].index(chest_pain_type)
 
@@ -48,20 +54,28 @@ max_heart_rate = st.slider(
 exercise_angina = st.selectbox(
     "Exercise Induced Angina", 
     ["Yes", "No"], 
-    help="Indicates whether the patient experienced angina (chest pain) during exercise."
+    help="Indicates whether the patient experienced angina (chest pain) during exercise:\n- Yes: Angina occurred.\n- No: Angina did not occur."
 )
 exercise_angina_value = 1 if exercise_angina == "Yes" else 0
 
 oldpeak = st.number_input(
     "Oldpeak (ST Depression)", 
     min_value=0.0, max_value=5.0, value=0.0, step=0.1,
-    help="ST depression measured during exercise relative to rest."
+    help=(
+        "ST depression measured during exercise relative to rest. "
+        "This indicates changes in the heart's electrical activity."
+    )
 )
 
 st_slope = st.selectbox(
     "ST Slope", 
     ["Upsloping", "Flat", "Downsloping"],
-    help="The slope of the ST segment during exercise."
+    help=(
+        "The slope of the ST segment during exercise:\n"
+        "- Upsloping: Generally indicates better heart condition.\n"
+        "- Flat: Suggests a moderate risk.\n"
+        "- Downsloping: Often linked to higher risk of heart issues."
+    )
 )
 st_slope_value = ["Upsloping", "Flat", "Downsloping"].index(st_slope)
 
