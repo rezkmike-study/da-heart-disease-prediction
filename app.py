@@ -1,7 +1,7 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 import pickle
+from fpdf import FPDF
 
 # Load the trained model
 model_path = "./model/best_random_forest_model.pkl"
@@ -15,10 +15,10 @@ st.write("This app predicts the risk of heart disease based on user input.")
 # User inputs for prediction
 st.header("Enter Patient Data")
 
-# Input fields
 hospital_name = "City General Hospital"
 
 patient_name = st.text_input("Patient Name", help="Enter the patient's full name.")
+dob = st.date_input("Date of Birth")
 nurse_name = st.selectbox(
     "Registered Nurse Name",
     ["Jia Hui", "Gayathri", "Kamil", "Yong Hui"],
@@ -35,13 +35,7 @@ sex_value = 1 if sex == "Male" else 0
 chest_pain_type = st.selectbox(
     "Chest Pain Type", 
     ["Typical Angina", "Atypical Angina", "Non-Anginal Pain", "Asymptomatic"],
-    help=(
-        "Type of chest pain experienced by the patient:\n"
-        "- Typical Angina: Pain caused by reduced blood flow to the heart.\n"
-        "- Atypical Angina: Less common symptoms of angina.\n"
-        "- Non-Anginal Pain: Chest pain not related to heart conditions.\n"
-        "- Asymptomatic: No chest pain symptoms."
-    )
+    help="Type of chest pain experienced by the patient."
 )
 chest_pain_type_value = ["Typical Angina", "Atypical Angina", "Non-Anginal Pain", "Asymptomatic"].index(chest_pain_type)
 
@@ -54,28 +48,20 @@ max_heart_rate = st.slider(
 exercise_angina = st.selectbox(
     "Exercise Induced Angina", 
     ["Yes", "No"], 
-    help="Indicates whether the patient experienced angina (chest pain) during exercise:\n- Yes: Angina occurred.\n- No: Angina did not occur."
+    help="Indicates whether the patient experienced angina (chest pain) during exercise."
 )
 exercise_angina_value = 1 if exercise_angina == "Yes" else 0
 
 oldpeak = st.number_input(
     "Oldpeak (ST Depression)", 
     min_value=0.0, max_value=5.0, value=0.0, step=0.1,
-    help=(
-        "ST depression measured during exercise relative to rest. "
-        "This indicates changes in the heart's electrical activity."
-    )
+    help="ST depression measured during exercise relative to rest."
 )
 
 st_slope = st.selectbox(
     "ST Slope", 
     ["Upsloping", "Flat", "Downsloping"],
-    help=(
-        "The slope of the ST segment during exercise:\n"
-        "- Upsloping: Generally indicates better heart condition.\n"
-        "- Flat: Suggests a moderate risk.\n"
-        "- Downsloping: Often linked to higher risk of heart issues."
-    )
+    help="The slope of the ST segment during exercise."
 )
 st_slope_value = ["Upsloping", "Flat", "Downsloping"].index(st_slope)
 
@@ -88,53 +74,72 @@ if st.button("Predict Heart Disease Risk"):
     prediction = model.predict(input_data)[0]
     prediction_proba = model.predict_proba(input_data)[0]
 
-    # Store prediction details
-    result_text = f"**Prediction Result for {patient_name}:**\n\n"
+    # Risk Assessment
     if prediction == 1:
-        result_text += f"{patient_name} is at **high risk** of heart disease.\n\n"
-        result_text += "**Suggested Next Steps:**\n- Schedule an appointment with a cardiologist.\n- Undergo further diagnostic tests such as ECG, stress test, or angiography.\n- Adopt a heart-healthy lifestyle: balanced diet, regular exercise, and stress management."
+        risk_level = "High Risk"
+        steps = "- Schedule an appointment with a cardiologist.\n- Undergo diagnostic tests like ECG or angiography.\n- Adopt a heart-healthy lifestyle."
     else:
-        result_text += f"Congratulations {patient_name}, you are at **low risk** of heart disease.\n\n"
-        result_text += "Keep maintaining a healthy lifestyle and consult your doctor for regular check-ups."
+        risk_level = "Low Risk"
+        steps = "Keep maintaining a healthy lifestyle and have regular check-ups."
 
-    # Display probabilities
-    result_text += f"\n\nProbability of low risk: {prediction_proba[0]:.2f}\n"
-    result_text += f"Probability of high risk: {prediction_proba[1]:.2f}"
+    # Generate PDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
 
-    # Display the result
-    st.subheader(result_text)
+    # Hospital Name
+    pdf.cell(200, 10, txt=hospital_name, ln=True, align="C")
 
-    # Generate a printable report
-    report = f"""
-    {hospital_name.center(50)}
-    
-    **Consent Notice:** This document contains the medical evaluation for heart disease risk based on patient-provided data. 
-    By proceeding with this evaluation, you consent to its use for diagnostic purposes.
-    
-    **Heart Disease Risk Evaluation Report**
-    
-    **Part 1: Patient Heart Disease Result**
-    Patient Name: {patient_name}
-    Sex: {sex}
-    Chest Pain Type: {chest_pain_type}
-    Maximum Heart Rate: {max_heart_rate} bpm
-    Exercise Induced Angina: {exercise_angina}
-    Oldpeak (ST Depression): {oldpeak}
-    ST Slope: {st_slope}
-    
-    Risk Evaluation:
-    {result_text}
-    
-    **Part 2: Medical Officer Information**
-    Nurse Name: {nurse_name}
-    
-    ---
-    This result was generated by the City General Hospital's Heart Disease Risk Prediction System.
-    """
-    # Add a download button for the report
-    st.download_button(
-        label="Download Report",
-        data=report,
-        file_name=f"{patient_name}_heart_disease_report.txt",
-        mime="text/plain"
-    )
+    # Consent Notice
+    pdf.multi_cell(0, 10, txt=(
+        "Consent Notice: This document contains the medical evaluation for heart disease risk based on patient-provided data. "
+        "By proceeding with this evaluation, you consent to its use for diagnostic purposes."
+    ))
+
+    # Patient Details
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", size=14)
+    pdf.cell(0, 10, "Heart Disease Risk Evaluation Report", ln=True)
+
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, f"Patient Name: {patient_name}", ln=True)
+    pdf.cell(0, 10, f"Date of Birth: {dob}", ln=True)
+    pdf.cell(0, 10, f"Sex: {sex}", ln=True)
+    pdf.cell(0, 10, f"Chest Pain Type: {chest_pain_type}", ln=True)
+    pdf.cell(0, 10, f"Maximum Heart Rate: {max_heart_rate} bpm", ln=True)
+    pdf.cell(0, 10, f"Exercise Induced Angina: {exercise_angina}", ln=True)
+    pdf.cell(0, 10, f"Oldpeak (ST Depression): {oldpeak}", ln=True)
+    pdf.cell(0, 10, f"ST Slope: {st_slope}", ln=True)
+
+    # Risk Assessment
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", size=12)
+    pdf.cell(0, 10, "Risk Assessment", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, f"Risk Level: {risk_level}", ln=True)
+    pdf.multi_cell(0, 10, txt=f"Suggested Next Steps:\n{steps}")
+
+    # Nurse Information
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", size=12)
+    pdf.cell(0, 10, "Medical Officer Information", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, f"Registered Nurse: {nurse_name}", ln=True)
+
+    # Footer
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", size=10)
+    pdf.multi_cell(0, 10, txt="This result was generated by the City General Hospital's Heart Disease Risk Prediction System.")
+
+    # Save PDF in memory
+    pdf_output = f"{patient_name}_heart_disease_report.pdf"
+    pdf.output(pdf_output)
+
+    # Streamlit download button
+    with open(pdf_output, "rb") as f:
+        st.download_button(
+            label="Download Report as PDF",
+            data=f,
+            file_name=pdf_output,
+            mime="application/pdf"
+        )
