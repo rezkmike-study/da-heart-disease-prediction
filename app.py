@@ -4,7 +4,7 @@ import pickle
 from fpdf import FPDF
 
 # Load the trained model
-model_path = "./model/best_random_forest_model.pkl"
+model_path = "./model/best_xgboost_model.pkl"
 with open(model_path, "rb") as file:
     model = pickle.load(file)
 
