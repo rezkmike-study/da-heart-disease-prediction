@@ -88,6 +88,22 @@ if st.button("Predict Heart Disease Risk"):
     prediction = model.predict(input_data)[0]
     prediction_proba = model.predict_proba(input_data)[0]
 
+    # Display the result
+    st.subheader(f"Prediction Result for {patient_name}")
+    if prediction == 1:
+        st.write(f"{patient_name} is at **high risk** of heart disease.")
+        st.write("**Suggested Next Steps:**")
+        st.write("- Schedule an appointment with a cardiologist.")
+        st.write("- Undergo further diagnostic tests such as ECG, stress test, or angiography.")
+        st.write("- Adopt a heart-healthy lifestyle: balanced diet, regular exercise, and stress management.")
+    else:
+        st.write(f"Congratulations {patient_name}, you are at **low risk** of heart disease.")
+        st.write("Keep maintaining a healthy lifestyle and consult your doctor for regular check-ups.")
+
+    # Display probabilities
+    st.write(f"Probability of low risk: {prediction_proba[0]:.2f}")
+    st.write(f"Probability of high risk: {prediction_proba[1]:.2f}")
+
     # Risk Assessment
     if prediction == 1:
         risk_level = "High Risk"
