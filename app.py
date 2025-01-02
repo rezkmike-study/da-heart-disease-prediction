@@ -4,7 +4,7 @@ import pickle
 from fpdf import FPDF
 
 # Load the trained model
-model_path = "./model/best_xgboost_model.pkl"
+model_path = "/mount/src/da-heart-disease-prediction/model/best_xgboost_model.pkl"
 with open(model_path, "rb") as file:
     model = pickle.load(file)
 
